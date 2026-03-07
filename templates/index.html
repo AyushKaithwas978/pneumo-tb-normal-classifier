@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chest X-ray Classifier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Spectral:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Chest Imaging Triage</p>
+        <h1>Chest X-ray Classifier</h1>
+        <p class="subtitle">Upload a frontal chest X-ray to estimate probabilities for Normal, Pneumonia, and Tuberculosis.</p>
+        <p class="disclaimer">Educational use only. This is not a medical diagnosis.</p>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data" class="upload-card">
+        <label class="file-label">
+          <input type="file" name="file" accept="image/*" required>
+          <span>Select X-ray image</span>
+        </label>
+        <button class="btn" type="submit">Upload and Classify</button>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alert">{{ messages[0] }}</div>
+          {% endif %}
+        {% endwith %}
+      </form>
+    </section>
+
+    {% if label %}
+    <section class="results">
+      <div class="result-card">
+        <div class="image-wrap">
+          <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded X-ray">
+        </div>
+        <div class="result-body">
+          <p class="result-label">Top prediction</p>
+          <h2>{{ label }}</h2>
+          <p class="confidence">Confidence: {{ confidence }}</p>
+          <div class="prob-list">
+            {% for name, p in probs %}
+            <div class="prob-row {% if name == label %}best{% endif %}">
+              <div class="prob-name">{{ name }}</div>
+              <div class="prob-bar"><span style="width: {{ (p * 100) | round(2) }}%"></span></div>
+              <div class="prob-val">{{ (p * 100) | round(2) }}%</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>
