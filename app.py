@@ -1,4 +1,4 @@
-﻿import os
+import os
 import uuid
 from pathlib import Path
 
@@ -39,12 +39,9 @@ def resolve_model_path():
     if default_path.exists():
         return default_path
 
-    legacy_path = BASE_DIR.parent / "Computer Vision" / "Transfer Learning" / "model_inception.h5"
-    if legacy_path.exists():
-        return legacy_path
-
     raise FileNotFoundError(
-        "Model file not found. Set MODEL_PATH or place model in models/model_inception.h5"
+        "Model file not found. Set MODEL_PATH or place model in models/model_inception.h5 "
+        "(and make sure it is tracked with Git LFS so it actually gets pushed to the Space)."
     )
 
 
@@ -142,5 +139,13 @@ def uploaded_file(filename):
     return redirect(url_for("static", filename=f"uploads/{filename}"))
 
 
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"})
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    # HF Spaces (Docker SDK) expects the app to listen on port 7860.
+    # debug=False is required for anything that isn't strictly local.
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port, debug=False)
