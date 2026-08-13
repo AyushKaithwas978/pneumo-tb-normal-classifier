@@ -9,9 +9,12 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array, load_img
 
+from rag_assistant import KnowledgeBase, build_explanation
+
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "static" / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+KNOWLEDGE_DIR = BASE_DIR / "knowledge_base"
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "8"))
@@ -22,6 +25,7 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
 app.secret_key = os.environ.get("APP_SECRET_KEY", "dev-secret-key")
 
 CLASS_NAMES = ["Normal", "Pneumonia", "Tuberculosis"]
+knowledge_base = KnowledgeBase(KNOWLEDGE_DIR)
 
 
 def resolve_model_path():
@@ -95,12 +99,14 @@ def index():
             return redirect(request.url)
 
         probs_list = [(name, probs[name]) for name in CLASS_NAMES]
+        explanation = build_explanation(label, confidence, probs, knowledge_base)
         return render_template(
             "index.html",
             filename=filename,
             label=label,
             confidence=f"{confidence * 100:.2f}%",
             probs=probs_list,
+            explanation=explanation,
         )
 
     return render_template("index.html")
@@ -120,11 +126,13 @@ def predict_api():
     file.save(filepath)
 
     label, confidence, probs = predict_probs(filepath)
+    explanation = build_explanation(label, confidence, probs, knowledge_base)
     response = {
         "predicted_class": label,
         "confidence": confidence,
         "probabilities": {k.lower(): v for k, v in probs.items()},
         "model_version": MODEL_PATH.name,
+        "explanation": explanation,
     }
     return jsonify(response)
 

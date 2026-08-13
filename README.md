@@ -1,6 +1,17 @@
-﻿# Pneumo/TB/Normal Classifier
+# Chest X-ray RAG Assistant
 
-Local Flask app to upload a chest X-ray and return probabilities for Normal, Pneumonia, and Tuberculosis.
+Local Flask app to upload a chest X-ray, return probabilities for Normal, Pneumonia, and Tuberculosis, and generate a cited educational explanation from a local Markdown knowledge base.
+
+This is an upgraded copy of the original classifier project. It runs offline and does not require an LLM API key.
+
+## Features
+
+- Chest X-ray upload UI
+- TensorFlow/Keras image classification
+- Probabilities for Normal, Pneumonia, and Tuberculosis
+- Local retrieval over `knowledge_base/*.md`
+- Structured assistant explanation with clinical context, next steps, suggested questions, citations, and safety disclaimer
+- JSON prediction API
 
 ## Quick start
 
@@ -39,10 +50,31 @@ Response:
     "pneumonia": 0.83,
     "tuberculosis": 0.12
   },
-  "model_version": "model_inception.h5"
+  "model_version": "model_inception.h5",
+  "explanation": {
+    "summary": "The model's top prediction is Pneumonia with 83.00% confidence.",
+    "clinical_context": ["..."],
+    "next_steps": ["..."],
+    "suggested_questions": ["..."],
+    "citations": [
+      {
+        "source": "pneumonia.md",
+        "title": "Pneumonia - Overview"
+      }
+    ],
+    "disclaimer": "This assistant is for educational use only..."
+  }
 }
+```
+
+## Tests
+
+Run the offline assistant tests:
+
+```
+python -m unittest tests.test_rag_assistant
 ```
 
 ## Notes
 
-This project is for educational use only and is not a medical diagnosis tool.
+This project is for educational use only and is not a medical diagnosis tool. A qualified clinician should review symptoms, history, examination findings, and imaging before medical decisions are made.

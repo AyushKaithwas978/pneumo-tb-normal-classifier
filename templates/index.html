@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chest X-ray Classifier</title>
+  <title>Chest X-ray RAG Assistant</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Spectral:wght@500;600&display=swap" rel="stylesheet">
@@ -13,9 +13,9 @@
   <main class="page">
     <section class="hero">
       <div class="hero-text">
-        <p class="eyebrow">Chest Imaging Triage</p>
-        <h1>Chest X-ray Classifier</h1>
-        <p class="subtitle">Upload a frontal chest X-ray to estimate probabilities for Normal, Pneumonia, and Tuberculosis.</p>
+        <p class="eyebrow">Chest Imaging Assistant</p>
+        <h1>Chest X-ray RAG Assistant</h1>
+        <p class="subtitle">Upload a frontal chest X-ray to estimate probabilities for Normal, Pneumonia, and Tuberculosis, then review a cited educational explanation.</p>
         <p class="disclaimer">Educational use only. This is not a medical diagnosis.</p>
       </div>
 
@@ -54,6 +54,54 @@
           </div>
         </div>
       </div>
+
+      {% if explanation %}
+      <div class="assistant-panel">
+        <p class="result-label">Assistant explanation</p>
+        <h2>What this result means</h2>
+        <p class="summary">{{ explanation.summary }}</p>
+
+        <div class="explanation-grid">
+          <div>
+            <h3>Retrieved context</h3>
+            {% for item in explanation.clinical_context %}
+            <p>{{ item }}</p>
+            {% endfor %}
+          </div>
+
+          <div>
+            <h3>Suggested next steps</h3>
+            <ul>
+              {% for step in explanation.next_steps %}
+              <li>{{ step }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <div class="explanation-grid compact">
+          <div>
+            <h3>Questions to ask</h3>
+            <ul>
+              {% for question in explanation.suggested_questions %}
+              <li>{{ question }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div>
+            <h3>Sources used</h3>
+            <ul class="citations">
+              {% for citation in explanation.citations %}
+              <li>{{ citation.title }} <span>{{ citation.source }}</span></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <p class="medical-warning">{{ explanation.disclaimer }}</p>
+      </div>
+      {% endif %}
     </section>
     {% endif %}
   </main>
